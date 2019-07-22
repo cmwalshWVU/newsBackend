@@ -18,5 +18,8 @@
     "pusher": "^2.2.1",
     "pusher-js": "^4.4.0",
     "pushid": "^1.0.0"
+  },
+  "engines": {
+    "node": "12.x"
   }
 }
