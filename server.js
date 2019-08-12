@@ -5,6 +5,7 @@ const express = require('express');
 const cors = require('cors');
 const Pusher = require('pusher');
 const NewsAPI = require('newsapi');
+const topic = 'news';
 
 const app = express();
 
@@ -39,7 +40,7 @@ function updateFeed(topic) {
                 counter += 1;
             })
             .catch(error => console.log(error));
-    }, 5000);
+    }, 172800);
 }
 
 app.get('/live', (req, res) => {
