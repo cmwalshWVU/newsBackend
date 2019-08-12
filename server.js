@@ -8,7 +8,6 @@ const NewsAPI = require('newsapi');
 
 const app = express();
 
-
 const pusher = new Pusher({
     appId: process.env.PUSHER_APP_ID,
     key: process.env.PUSHER_APP_KEY,
@@ -32,14 +31,14 @@ app.use(cors());
 function updateFeed(topic) {
     let counter = 2;
     setInterval(() => {
-    fetchNews(topic, counter)
-        .then(response => {
-        pusher.trigger('news-channel', 'update-news', {
-            articles: response.articles,
-        });
-        counter += 1;
-        })
-        .catch(error => console.log(error));
+        fetchNews(topic, counter)
+            .then(response => {
+                pusher.trigger('news-channel', 'update-news', {
+                    articles: response.articles,
+                });
+                counter += 1;
+            })
+            .catch(error => console.log(error));
     }, 5000);
 }
 
@@ -49,11 +48,11 @@ app.get('/live', (req, res) => {
     now.setHours(now.getHours()-6);
    
     fetchNews(topic, 1, now.toISOString())
-    .then(response => {
-        res.json(response.articles);
-        updateFeed(topic);
-    })
-    .catch(error => console.log(error));
+        .then(response => {
+            res.json(response.articles);
+            updateFeed(topic);
+        })
+        .catch(error => console.log(error));
 });
 
 app.set('port', process.env.PORT || 5000);
