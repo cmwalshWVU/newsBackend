@@ -56,6 +56,16 @@ app.get('/live', (req, res) => {
         .catch(error => console.log(error));
 });
 
+app.post('/redirect', (req, res) => {
+    console.log(req)
+    console.log(res)
+    // fetch('https://us-central1-crypto-watch-dbf71.cloudfunctions.net/token')
+    //         .then(response => response.json())
+    //         .then(articles => {
+    //             dispatch(updateNewsData(articles));
+    //         }).catch(error => console.log(error))
+});
+
 app.set('port', process.env.PORT || 5000);
 const server = app.listen(app.get('port'), () => {
     console.log(`Express running → PORT ${server.address().port}`);
