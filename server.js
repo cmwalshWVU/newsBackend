@@ -66,11 +66,11 @@ app.get('/live', (req, res) => {
     console.log("Calling Live")
     fetchNews(topic, 1, now.toISOString())
         .then(response => {
-            // for (i = 0; i < response.articles.length; i++) {
-            //     pusher.trigger('news-channel', 'update-news', {
-            //         articles: response.articles[i],
-            //     });
-            // }   
+            for (i = 0; i < response.articles.length; i++) {
+                pusher.trigger('news-channel', 'update-news', {
+                    articles: response.articles[i],
+                });
+            }   
             res.json(response.articles);
             updateFeed(topic);
         })
@@ -101,7 +101,7 @@ function fetchTopCryptos(numberOfDataPoints) {
         .catch(err => console.log(err));
 }
 
-app.set('port', process.env.PORT || 5000);
+app.set('port', process.env.PORT || s);
 const server = app.listen(app.get('port'), () => {
     console.log(`Express running → PORT ${server.address().port}`);
 });
