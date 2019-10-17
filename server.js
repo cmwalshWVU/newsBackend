@@ -48,6 +48,7 @@ function updateFeed(topic) {
         fetchNews(topic, counter)
             .then(response => {
                 for (i = 0; i < response.articles.length; i++) {
+                    // console.log(JSON.stringify(response.articles[i]))
                     pusher.trigger('news-channel', 'update-news', {
                         articles: response.articles[i],
                     });
@@ -65,11 +66,11 @@ app.get('/live', (req, res) => {
     console.log("Calling Live")
     fetchNews(topic, 1, now.toISOString())
         .then(response => {
-            for (i = 0; i < response.articles.length; i++) {
-                pusher.trigger('news-channel', 'update-news', {
-                    articles: response.articles[i],
-                });
-            }   
+            // for (i = 0; i < response.articles.length; i++) {
+            //     pusher.trigger('news-channel', 'update-news', {
+            //         articles: response.articles[i],
+            //     });
+            // }   
             res.json(response.articles);
             updateFeed(topic);
         })
