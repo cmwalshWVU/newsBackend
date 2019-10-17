@@ -10,8 +10,6 @@ const topic = 'news';
 const axios = require('axios');
 const app = express();
 
-// var serviceAccount = require("./key.json");
-
 admin.initializeApp({
     credential: admin.credential.cert({
         "type": "service_account",
@@ -28,6 +26,15 @@ admin.initializeApp({
     databaseURL: "https://crypto-watch-dbf71.firebaseio.com"
   });
 
+
+// var serviceAccount = require("./key.json");
+
+// admin.initializeApp({
+//     credential: admin.credential.cert(serviceAccount),
+//     databaseURL: "https://crypto-watch-dbf71.firebaseio.com"
+//   });
+
+  
 
 const pusher = new Pusher({
     appId: process.env.PUSHER_APP_ID,
