@@ -112,7 +112,7 @@ function fetchTopCryptos(numberOfDataPoints) {
         .catch(err => console.log(err));
 }
 
-app.set('port', process.env.PORT || s);
+app.set('port', process.env.PORT || 5000);
 const server = app.listen(app.get('port'), () => {
     console.log(`Express running → PORT ${server.address().port}`);
 });
