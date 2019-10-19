@@ -10,10 +10,12 @@ const topic = 'news';
 const axios = require('axios');
 const app = express();
 
-// admin.initializeApp({
-//     credential: admin.credential.cert(process.env.FIREBASE_CONFIG),
-//     databaseURL: "https://crypto-watch-dbf71.firebaseio.com"
-//   });
+var serviceAccount = process.env.FIREBASE_CONFIG;
+
+admin.initializeApp({
+    credential: admin.credential.cert(JSON.parse(serviceAccount)),
+    databaseURL: "https://crypto-watch-dbf71.firebaseio.com"
+  });
 
 // const config  = {
 //     type: "service_account",
@@ -105,9 +107,9 @@ function fetchPriceData(ticker, numberOfDataPoints) {
     axios.get('https://min-api.cryptocompare.com/data/histominute?fsym=' + ticker + '&tsym=USD&limit=' + numberOfDataPoints + '&aggregate=1&e=CCCAGG')
         .then(response => {
             response.data.Data.map(price => {
-                // admin.firestore().collection('priceData').doc('priceHistory').collection(ticker).doc(price.time.toString()).set({
-                //     timeStamp: price.time,
-                //     price: price })
+                admin.firestore().collection('priceData').doc('priceHistory').collection(ticker).doc(price.time.toString()).set({
+                    timeStamp: price.time,
+                    price: price })
                 pusher.trigger('price-channel', ticker, {
                     prices: price,
                 });
@@ -117,7 +119,7 @@ function fetchPriceData(ticker, numberOfDataPoints) {
 }
 
 function fetchTopCryptos(numberOfDataPoints) {
-    // console.log(JSON.stringify(config))
+    console.log(JSON.stringify(serviceAccount))
     axios.get("https://api.coinmarketcap.com/v1/ticker/?limit=20")
         .then(response => {
             var result = response.data.filter(currency => currency.rank <= 10);
