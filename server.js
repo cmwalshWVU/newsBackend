@@ -70,8 +70,10 @@ app.use(cors());
 
 function updateFeed(topic) {
     let counter = 2;
+    var now = new Date();
+    now.setMinutes(now.getMinutes()-3);
     setInterval(() => {
-        fetchNews(topic, counter)
+        fetchNews(topic, counter, now)
             .then(response => {
                 for (i = 0; i < response.articles.length; i++) {
                     // console.log(JSON.stringify(response.articles[i]))
