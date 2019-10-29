@@ -55,6 +55,9 @@ const pusher = new Pusher({
 const newsapi = new NewsAPI(process.env.NEWS_API_KEY);
 
 const setPrices = fetchTopCryptos(100);
+const news = cryptoCompareNews();
+let newsCCNTimerId = setTimeout(() => cryptoCompareNews(), 5);
+
 // repeat with the interval of 2 seconds
 let newsTimerId = setTimeout(() => fetchNewsData(), 5);
 let pricesTimerId = setInterval(() => fetchTopCryptos(1), 60000);
@@ -76,10 +79,12 @@ function updateFeed(topic) {
     setInterval(() => {
         fetchNews(topic, counter, now)
             .then(response => {
-                for (i = 0; i < response.articles.length; i++) {
+                let sorted = response.articles.sort((a, b) => (a.publishedAt > b.publishedAt) ? 1 : -1)
+
+                for (i = 0; i < sorted.length; i++) {
                     // console.log(JSON.stringify(response.articles[i]))
                     pusher.trigger('news-channel', 'update-news', {
-                        articles: response.articles[i],
+                        articles: sorted[i],
                     });
                 }
                 counter += 1;
@@ -107,6 +112,25 @@ app.get('/live', (req, res) => {
         .catch(error => console.log(error));
 });
 
+function cryptoCompareNews() {
+    axios.get('https://min-api.cryptocompare.com/data/v2/news/')
+        .then(response => {
+            if (response.data !== null && response.data.Data !== undefined) {
+                console.log("sendings news")
+                for (i = 0; i < response.data.Data.length; i++) {
+                    pusher.trigger('news-channel', 'update-news', {
+                        articles: response.data.Data[i],
+                    });
+                }   
+            }
+            else {
+                console.log("not sendings news")
+
+            }
+        })
+        .catch(err => console.log(err));
+}
+
 function fetchNewsData () {
     const topic = 'crypto';
     var now = new Date();
@@ -114,12 +138,14 @@ function fetchNewsData () {
     console.log("Calling Live")
     fetchNews(topic, 1, now.toISOString())
         .then(response => {
-            for (i = 0; i < response.articles.length; i++) {
+            let sorted = response.articles.sort((a, b) => (a.publishedAt > b.publishedAt) ? 1 : -1)
+
+            for (i = 0; i < sorted.length; i++) {
                 pusher.trigger('news-channel', 'update-news', {
-                    articles: response.articles[i],
+                    articles: sorted[i],
                 });
             }   
-            res.json(response.articles);
+            res.json(sorted);
             updateFeed(topic);
         })
         .catch(error => console.log(error));
