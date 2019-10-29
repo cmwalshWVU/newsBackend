@@ -56,7 +56,7 @@ const newsapi = new NewsAPI(process.env.NEWS_API_KEY);
 
 const setPrices = fetchTopCryptos(100);
 // repeat with the interval of 2 seconds
-let newsTimerId = setInterval(() => fetchTopCryptos(1), 60000);
+let newsTimerId = setInterval(() => fetchTopCryptos(), 60000);
 let pricesTimerId = setInterval(() => fetchNewsData(1), 60000);
 
 const fetchNews = (searchTerm, pageNum, date) =>
@@ -142,7 +142,7 @@ function fetchPriceData(ticker, numberOfDataPoints) {
 }
 
 function fetchTopCryptos(numberOfDataPoints) {
-    console.log(JSON.stringify(serviceAccount))
+    // console.log(JSON.stringify(serviceAccount))
     axios.get("https://api.coinmarketcap.com/v1/ticker/?limit=20")
         .then(response => {
             if (response.data !== null) {
