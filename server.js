@@ -10,29 +10,29 @@ const topic = 'news';
 const axios = require('axios');
 const app = express();
 
-var serviceAccount = process.env.FIREBASE_CONFIG;
+// var serviceAccount = process.env.FIREBASE_CONFIG;
 
-admin.initializeApp({
-    credential: admin.credential.cert(JSON.parse(serviceAccount)),
-    databaseURL: "https://crypto-watch-dbf71.firebaseio.com"
-  });
-
-// const config  = {
-//     type: "service_account",
-//     project_id: "crypto-watch-dbf71",
-//     private_key_id: process.env.PRIVATE_KEY_ID,
-//     private_key: process.env.PRIVATE_KEY,
-//     client_email: process.env.CLIENT_EMAIL,
-//     client_id: process.env.CLIENT_ID,
-//     auth_uri: process.env.AUTH_URI,
-//     token_uri: process.env.TOKEN_URI,
-//     auth_provider_x509_cert_url: process.env.AUTH_PROVIDER_X509_CERT_URL,
-//     client_x509_cert_url: process.env.CLIENT_X509_CERT_URL
-//   }
 // admin.initializeApp({
-//     credential: admin.credential.cert(config),
+//     credential: admin.credential.cert(JSON.parse(serviceAccount)),
 //     databaseURL: "https://crypto-watch-dbf71.firebaseio.com"
 //   });
+
+const config  = {
+    type: "service_account",
+    project_id: "crypto-watch-dbf71",
+    private_key_id: process.env.PRIVATE_KEY_ID,
+    private_key: process.env.PRIVATE_KEY,
+    client_email: process.env.CLIENT_EMAIL,
+    client_id: process.env.CLIENT_ID,
+    auth_uri: process.env.AUTH_URI,
+    token_uri: process.env.TOKEN_URI,
+    auth_provider_x509_cert_url: process.env.AUTH_PROVIDER_X509_CERT_URL,
+    client_x509_cert_url: process.env.CLIENT_X509_CERT_URL
+  }
+admin.initializeApp({
+    credential: admin.credential.cert(config),
+    databaseURL: "https://crypto-watch-dbf71.firebaseio.com"
+  });
 
 
 // var serviceAccount = require("./key.json");
@@ -56,7 +56,7 @@ const newsapi = new NewsAPI(process.env.NEWS_API_KEY);
 
 const setPrices = fetchTopCryptos(100);
 // repeat with the interval of 2 seconds
-let newsTimerId = fetchNewsData()
+let newsTimerId = setTimeout(() => fetchNewsData(), 5);
 let pricesTimerId = setInterval(() => fetchTopCryptos(1), 60000);
 
 const fetchNews = (searchTerm, pageNum, date) =>
