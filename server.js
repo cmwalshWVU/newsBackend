@@ -56,8 +56,8 @@ const newsapi = new NewsAPI(process.env.NEWS_API_KEY);
 
 const setPrices = fetchTopCryptos(100);
 // repeat with the interval of 2 seconds
-let newsTimerId = setInterval(() => fetchTopCryptos(), 60000);
-let pricesTimerId = setInterval(() => fetchNewsData(1), 60000);
+let newsTimerId = setInterval(() => fetchNewsData(), 172800);
+let pricesTimerId = setInterval(() => fetchTopCryptos(1), 60000);
 
 const fetchNews = (searchTerm, pageNum, date) =>
     newsapi.v2.everything({
@@ -101,7 +101,7 @@ app.get('/live', (req, res) => {
                 });
             }   
             res.json(response.articles);
-            updateFeed(topic);
+            // updateFeed(topic);
         })
         .catch(error => console.log(error));
 });
