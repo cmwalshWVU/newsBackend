@@ -95,13 +95,13 @@ app.get('/live', (req, res) => {
     console.log("Calling Live")
     fetchNews(topic, 1, now.toISOString())
         .then(response => {
-            // let sorted = response.articles.sort((a, b) => (a.publishedAt > b.publishedAt) ? 1 : -1)
-            for (i = 0; i < response.articles.length; i++) {
+            let sorted = response.articles.sort((a, b) => (a.publishedAt > b.publishedAt) ? 1 : -1)
+            for (i = 0; i < sorted.length; i++) {
                 pusher.trigger('news-channel', 'update-news', {
-                    articles: response.articles[i],
+                    articles: sorted[i],
                 });
             }   
-            res.json(response.articles);
+            res.json(sorted);
             // updateFeed(topic);
         })
         .catch(error => console.log(error));
