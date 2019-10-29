@@ -56,7 +56,7 @@ const newsapi = new NewsAPI(process.env.NEWS_API_KEY);
 
 const setPrices = fetchTopCryptos(100);
 // repeat with the interval of 2 seconds
-let newsTimerId = setInterval(() => fetchNewsData(), 172800);
+let newsTimerId = fetchNewsData()
 let pricesTimerId = setInterval(() => fetchTopCryptos(1), 60000);
 
 const fetchNews = (searchTerm, pageNum, date) =>
@@ -95,6 +95,7 @@ app.get('/live', (req, res) => {
     console.log("Calling Live")
     fetchNews(topic, 1, now.toISOString())
         .then(response => {
+            // let sorted = response.articles.sort((a, b) => (a.publishedAt > b.publishedAt) ? 1 : -1)
             for (i = 0; i < response.articles.length; i++) {
                 pusher.trigger('news-channel', 'update-news', {
                     articles: response.articles[i],
