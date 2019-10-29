@@ -56,7 +56,8 @@ const newsapi = new NewsAPI(process.env.NEWS_API_KEY);
 
 const setPrices = fetchTopCryptos(100);
 // repeat with the interval of 2 seconds
-let timerId = setInterval(() => fetchTopCryptos(1), 60000);
+let newsTimerId = setInterval(() => fetchNewsData(), 172800);
+let pricesTimerId = setInterval(() => fetchTopCryptos(1), 60000);
 
 const fetchNews = (searchTerm, pageNum, date) =>
     newsapi.v2.everything({
@@ -100,10 +101,28 @@ app.get('/live', (req, res) => {
                 });
             }   
             res.json(response.articles);
-            updateFeed(topic);
+            // updateFeed(topic);
         })
         .catch(error => console.log(error));
 });
+
+function fetchNewsData () {
+    const topic = 'crypto';
+    var now = new Date();
+    now.setHours(now.getHours()-6);
+    console.log("Calling Live")
+    fetchNews(topic, 1, now.toISOString())
+        .then(response => {
+            for (i = 0; i < response.articles.length; i++) {
+                pusher.trigger('news-channel', 'update-news', {
+                    articles: response.articles[i],
+                });
+            }   
+            res.json(response.articles);
+            updateFeed(topic);
+        })
+        .catch(error => console.log(error));
+}
 
 function fetchPriceData(ticker, numberOfDataPoints) {
     axios.get('https://min-api.cryptocompare.com/data/histominute?fsym=' + ticker + '&tsym=USD&limit=' + numberOfDataPoints + '&aggregate=1&e=CCCAGG')
@@ -123,7 +142,7 @@ function fetchPriceData(ticker, numberOfDataPoints) {
 }
 
 function fetchTopCryptos(numberOfDataPoints) {
-    console.log(JSON.stringify(serviceAccount))
+    // console.log(JSON.stringify(serviceAccount))
     axios.get("https://api.coinmarketcap.com/v1/ticker/?limit=20")
         .then(response => {
             if (response.data !== null) {
