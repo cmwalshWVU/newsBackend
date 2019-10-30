@@ -54,9 +54,9 @@ const pusher = new Pusher({
 
 const newsapi = new NewsAPI(process.env.NEWS_API_KEY);
 
-const setPrices = fetchTopCryptos(100);
-const news = cryptoCompareNews();
-let newsCCNTimerId = setTimeout(() => cryptoCompareNews(), 5);
+const setPrices = setTimeout(() => fetchTopCryptos(100), 10000);
+// const news = cryptoCompareNews();
+let newsCCNTimerId = setTimeout(() => cryptoCompareNews(), 10000);
 
 // repeat with the interval of 2 seconds
 let newsTimerId = setTimeout(() => fetchNewsData(), 5);
@@ -145,7 +145,7 @@ function fetchNewsData () {
                     articles: sorted[i],
                 });
             }   
-            res.json(sorted);
+            // res.json(sorted);
             updateFeed(topic);
         })
         .catch(error => console.log(error));
@@ -155,14 +155,14 @@ function fetchPriceData(ticker, numberOfDataPoints) {
     axios.get('https://min-api.cryptocompare.com/data/histominute?fsym=' + ticker + '&tsym=USD&limit=' + numberOfDataPoints + '&aggregate=1&e=CCCAGG')
         .then(response => {
             if (response.data !== null && response.data.Data !== null) {
-                response.data.Data.map(price => {
+                for (i = 0; i < response.data.Data.length; i++) {
                     admin.firestore().collection('priceData').doc('priceHistory').collection(ticker).doc(price.time.toString()).set({
-                        timeStamp: price.time,
-                        price: price })
+                        timeStamp: response.data.Data[i].time,
+                        price: response.data.Data[i] })
                     pusher.trigger('price-channel', ticker, {
-                        prices: price,
+                        prices: response.data.Data[i],
                     });
-                })
+                }
             }
         })
         .catch(err => console.log(err));
