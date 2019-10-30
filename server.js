@@ -156,7 +156,7 @@ function fetchPriceData(ticker, numberOfDataPoints) {
         .then(response => {
             if (response.data !== null && response.data.Data !== null) {
                 for (i = 0; i < response.data.Data.length; i++) {
-                    admin.firestore().collection('priceData').doc('priceHistory').collection(ticker).doc(price.time.toString()).set({
+                    admin.firestore().collection('priceData').doc('priceHistory').collection(ticker).doc(response.data.Data[i].time.toString()).set({
                         timeStamp: response.data.Data[i].time,
                         price: response.data.Data[i] })
                     pusher.trigger('price-channel', ticker, {
