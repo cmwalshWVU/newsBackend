@@ -96,7 +96,7 @@ function updateFeed(topic) {
 app.get('/live', (req, res) => {
     const topic = 'crypto';
     var now = new Date();
-    now.setDate(now.getDay()-2);
+    now.setHours(now.getHours()-6);
     console.log("Calling Live")
     cryptoCompareNews()
     fetchNews(topic, 1, now.toISOString())
