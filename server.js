@@ -1,21 +1,18 @@
+require("dotenv").config({ path: "variables.env" });
+var admin = require("firebase-admin");
 
-require('dotenv').config({ path: 'variables.env' });
-var admin = require('firebase-admin');
-
-const express = require('express');
-const cors = require('cors');
-const Pusher = require('pusher');
-const NewsAPI = require('newsapi');
-const topic = 'news';
-const axios = require('axios');
+const express = require("express");
+const cors = require("cors");
+const Pusher = require("pusher");
+const NewsAPI = require("newsapi");
+const axios = require("axios");
 const app = express();
-
 var serviceAccount = process.env.FIREBASE_CONFIG;
 
 admin.initializeApp({
-    credential: admin.credential.cert(JSON.parse(serviceAccount)),
-    databaseURL: "https://crypto-watch-dbf71.firebaseio.com"
-  });
+  credential: admin.credential.cert(JSON.parse(serviceAccount)),
+  databaseURL: "https://crypto-watch-dbf71.firebaseio.com"
+});
 
 // const config  = {
 //     type: "service_account",
@@ -34,7 +31,6 @@ admin.initializeApp({
 //     databaseURL: "https://crypto-watch-dbf71.firebaseio.com"
 //   });
 
-
 // var serviceAccount = require("./key.json");
 
 // admin.initializeApp({
@@ -42,146 +38,164 @@ admin.initializeApp({
 //     databaseURL: "https://crypto-watch-dbf71.firebaseio.com"
 //   });
 
-  
-
 const pusher = new Pusher({
-    appId: process.env.PUSHER_APP_ID,
-    key: process.env.PUSHER_APP_KEY,
-    secret: process.env.PUSHER_APP_SECRET,
-    cluster: process.env.PUSHER_APP_CLUSTER,
-    encrypted: true,
+  appId: process.env.PUSHER_APP_ID,
+  key: process.env.PUSHER_APP_KEY,
+  secret: process.env.PUSHER_APP_SECRET,
+  cluster: process.env.PUSHER_APP_CLUSTER,
+  encrypted: true
 });
 
 const newsapi = new NewsAPI(process.env.NEWS_API_KEY);
 
-const setPrices = setTimeout(() => fetchTopCryptos(100), 10000);
+setTimeout(() => fetchTopCryptos(100), 10000);
 // const news = cryptoCompareNews();
-let newsCCNTimerId = setTimeout(() => cryptoCompareNews(), 10000);
+setTimeout(() => cryptoCompareNews(), 10000);
 
 // repeat with the interval of 2 seconds
-let newsTimerId = setTimeout(() => fetchNewsData(), 5);
-let pricesTimerId = setInterval(() => fetchTopCryptos(1), 60000);
+setTimeout(() => fetchNewsData(), 5);
+setInterval(() => fetchTopCryptos(1), 60000);
 
 const fetchNews = (searchTerm, pageNum, date) =>
-    newsapi.v2.everything({
+  newsapi.v2.everything({
     q: searchTerm,
     from: date,
-    language: 'en',
-    sortBy:'recency',
-    });
+    language: "en",
+    sortBy: "recency"
+  });
 
 app.use(cors());
 
 function updateFeed(topic) {
-    let counter = 2;
-    var now = new Date();
-    now.setMinutes(now.getMinutes()-3);
-    setInterval(() => {
-        fetchNews(topic, counter, now)
-            .then(response => {
-                let sorted = response.articles.sort((a, b) => (a.publishedAt > b.publishedAt) ? 1 : -1)
+  let counter = 2;
+  var now = new Date();
+  now.setMinutes(now.getMinutes() - 3);
+  setInterval(() => {
+    fetchNews(topic, counter, now)
+      .then(response => {
+        let sorted = response.articles.sort((a, b) =>
+          a.publishedAt > b.publishedAt ? 1 : -1
+        );
 
-                for (i = 0; i < sorted.length; i++) {
-                    // console.log(JSON.stringify(response.articles[i]))
-                    pusher.trigger('news-channel', 'update-news', {
-                        articles: sorted[i],
-                    });
-                }
-                counter += 1;
-            })
-            .catch(error => console.log(error));
-    }, 172800);
+        for (let i = 0; i < sorted.length; i++) {
+          // console.log(JSON.stringify(response.articles[i]))
+          pusher.trigger("news-channel", "update-news", {
+            articles: sorted[i]
+          });
+        }
+        counter += 1;
+      })
+      .catch(error => console.log(error));
+  }, 172800);
 }
 
-app.get('/live', (req, res) => {
-    const topic = 'crypto';
-    var now = new Date();
-    now.setHours(now.getHours()-6);
-    console.log("Calling Live")
-    cryptoCompareNews()
-    fetchNews(topic, 1, now.toISOString())
-        .then(response => {
-            let sorted = response.articles.sort((a, b) => (a.publishedAt > b.publishedAt) ? 1 : -1)
-            for (i = 0; i < sorted.length; i++) {
-                pusher.trigger('news-channel', 'update-news', {
-                    articles: sorted[i],
-                });
-            }   
-            res.json(sorted);
-            // updateFeed(topic);
-        })
-        .catch(error => console.log(error));
+app.get("/live", (req, res) => {
+  const topic = "crypto";
+  var now = new Date();
+  now.setHours(now.getHours() - 6);
+  console.log("Calling Live");
+  cryptoCompareNews();
+  fetchNews(topic, 1, now.toISOString())
+    .then(response => {
+      let sorted = response.articles.sort((a, b) =>
+        a.publishedAt > b.publishedAt ? 1 : -1
+      );
+      for (let i = 0; i < sorted.length; i++) {
+        pusher.trigger("news-channel", "update-news", {
+          articles: sorted[i]
+        });
+      }
+      res.json(sorted);
+      // updateFeed(topic);
+    })
+    .catch(error => console.log(error));
 });
 
 function cryptoCompareNews() {
-    axios.get('https://min-api.cryptocompare.com/data/v2/news/')
-        .then(response => {
-            if (response.data !== null && response.data.Data !== undefined) {
-                console.log("sendings news")
-                for (i = 0; i < response.data.Data.length; i++) {
-                    pusher.trigger('news-channel', 'update-news', {
-                        articles: response.data.Data[i],
-                    });
-                }   
-            }
-            else {
-                console.log("not sendings news")
-
-            }
-        })
-        .catch(err => console.log(err));
+  axios
+    .get("https://min-api.cryptocompare.com/data/v2/news/")
+    .then(response => {
+      if (response.data !== null && response.data.Data !== undefined) {
+        console.log("sendings news");
+        for (let i = 0; i < response.data.Data.length; i++) {
+          pusher.trigger("news-channel", "update-news", {
+            articles: response.data.Data[i]
+          });
+        }
+      } else {
+        console.log("not sendings news");
+      }
+    })
+    .catch(err => console.log(err));
 }
 
-function fetchNewsData () {
-    const topic = 'crypto';
-    var now = new Date();
-    now.setHours(now.getHours()-6);
-    console.log("Calling Live")
-    fetchNews(topic, 1, now.toISOString())
-        .then(response => {
-            let sorted = response.articles.sort((a, b) => (a.publishedAt > b.publishedAt) ? 1 : -1)
+function fetchNewsData() {
+  const topic = "crypto";
+  var now = new Date();
+  now.setHours(now.getHours() - 6);
+  console.log("Calling Live");
+  fetchNews(topic, 1, now.toISOString())
+    .then(response => {
+      let sorted = response.articles.sort((a, b) =>
+        a.publishedAt > b.publishedAt ? 1 : -1
+      );
 
-            for (i = 0; i < sorted.length; i++) {
-                pusher.trigger('news-channel', 'update-news', {
-                    articles: sorted[i],
-                });
-            }   
-            // res.json(sorted);
-            updateFeed(topic);
-        })
-        .catch(error => console.log(error));
+      for (let i = 0; i < sorted.length; i++) {
+        pusher.trigger("news-channel", "update-news", {
+          articles: sorted[i]
+        });
+      }
+      // res.json(sorted);
+      updateFeed(topic);
+    })
+    .catch(error => console.log(error));
 }
 
 function fetchPriceData(ticker, numberOfDataPoints) {
-    axios.get('https://min-api.cryptocompare.com/data/histominute?fsym=' + ticker + '&tsym=USD&limit=' + numberOfDataPoints + '&aggregate=1&e=CCCAGG')
-        .then(response => {
-            if (response.data !== null && response.data.Data !== null) {
-                for (i = 0; i < response.data.Data.length; i++) {
-                    admin.firestore().collection('priceData').doc('priceHistory').collection(ticker).doc(response.data.Data[i].time.toString()).set({
-                        timeStamp: response.data.Data[i].time,
-                        price: response.data.Data[i] })
-                    pusher.trigger('price-channel', ticker, {
-                        prices: response.data.Data[i],
-                    });
-                }
-            }
-        })
-        .catch(err => console.log(err));
+  axios
+    .get(
+      "https://min-api.cryptocompare.com/data/histominute?fsym=" +
+        ticker +
+        "&tsym=USD&limit=" +
+        numberOfDataPoints +
+        "&aggregate=1&e=CCCAGG"
+    )
+    .then(response => {
+      if (response.data !== null && response.data.Data !== null) {
+        for (let i = 0; i < response.data.Data.length; i++) {
+          admin
+            .firestore()
+            .collection("priceData")
+            .doc("priceHistory")
+            .collection(ticker)
+            .doc(response.data.Data[i].time.toString())
+            .set({
+              timeStamp: response.data.Data[i].time,
+              price: response.data.Data[i]
+            });
+          pusher.trigger("price-channel", ticker, {
+            prices: response.data.Data[i]
+          });
+        }
+      }
+    })
+    .catch(err => console.log(err));
 }
 
 function fetchTopCryptos(numberOfDataPoints) {
-    // console.log(JSON.stringify(serviceAccount))
-    axios.get("https://api.coinmarketcap.com/v1/ticker/?limit=20")
-        .then(response => {
-            if (response.data !== null) {
-                var result = response.data.filter(currency => currency.rank <= 10);
-                result.map(crypto => fetchPriceData(crypto.symbol, numberOfDataPoints));
-            }
-        })
-        .catch(err => console.log(err));
+  // console.log(JSON.stringify(serviceAccount))
+  axios
+    .get("https://api.coinmarketcap.com/v1/ticker/?limit=20")
+    .then(response => {
+      if (response.data !== null) {
+        var result = response.data.filter(currency => currency.rank <= 10);
+        result.map(crypto => fetchPriceData(crypto.symbol, numberOfDataPoints));
+      }
+    })
+    .catch(err => console.log(err));
 }
 
-app.set('port', process.env.PORT || 5000);
-const server = app.listen(app.get('port'), () => {
-    console.log(`Express running → PORT ${server.address().port}`);
+app.set("port", process.env.PORT || 5000);
+const server = app.listen(app.get("port"), () => {
+  console.log(`Express running → PORT ${server.address().port}`);
 });
