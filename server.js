@@ -54,7 +54,7 @@ setTimeout(() => cryptoCompareNews(), 10000);
 
 // repeat with the interval of 2 seconds
 setTimeout(() => fetchNewsData(), 5);
-setInterval(() => fetchTopCryptos(1), 900000);
+setInterval(() => fetchTopCryptos(1), 60000);
 
 const fetchNews = (searchTerm, pageNum, date) =>
   newsapi.v2.everything({
@@ -158,7 +158,7 @@ function fetchPriceData(ticker, numberOfDataPoints) {
         ticker +
         "&tsym=USD&limit=" +
         numberOfDataPoints +
-        "&aggregate=15&e=CCCAGG"
+        "&aggregate=1&e=CCCAGG"
     )
     .then(response => {
       if (response.data !== null && response.data.Data !== null) {
