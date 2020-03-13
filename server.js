@@ -89,6 +89,18 @@ function updateFeed(topic) {
   }, 172800);
 }
 
+app.get("/top", (req, res) => {
+  console.log("TEST")
+  axios.get("https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?CMC_PRO_API_KEY=5b82bdf3-bf6d-4153-855b-635c1519b7a8")
+      .then(response => {
+          console.log(response.data)
+
+          res.json(response.data);
+      })
+      .catch(err => console.log(err));
+  }
+);
+
 app.get("/live", (req, res) => {
   const topic = "crypto";
   var now = new Date();
