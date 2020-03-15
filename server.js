@@ -92,8 +92,6 @@ function updateFeed(topic) {
 app.get("/top", (req, res) => {
   axios.get("https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?CMC_PRO_API_KEY=5b82bdf3-bf6d-4153-855b-635c1519b7a8")
       .then(response => {
-          console.log(response.data)
-
           res.json(response.data);
       })
       .catch(err => console.log(err));
@@ -103,11 +101,9 @@ app.get("/top", (req, res) => {
 app.get("/history", (req, res) => {
   console.log(req.query.ticker)
   axios.get('https://min-api.cryptocompare.com/data/histominute?fsym=' + req.query.ticker + '&tsym=USD&limit=100&aggregate=15&e=CCCAGG')      .then(response => {
-          console.log(response.data)
-
-          res.json(response.data);
-      })
-      .catch(err => console.log(err));
+    res.json(response.data);
+  })
+  .catch(err => console.log(err));
   }
 );
 
@@ -167,7 +163,6 @@ function fetchNewsData() {
           articles: sorted[i]
         });
       }
-      // res.json(sorted);
       updateFeed(topic);
     })
     .catch(error => console.log(error));
@@ -205,12 +200,10 @@ function fetchPriceData(ticker, numberOfDataPoints) {
 }
 
 function fetchTopCryptos(numberOfDataPoints) {
-  // console.log(JSON.stringify(serviceAccount))
-  axios
-    .get("https://api.coinmarketcap.com/v1/ticker/?limit=20")
+  axios.get("https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?CMC_PRO_API_KEY=5b82bdf3-bf6d-4153-855b-635c1519b7a8")
     .then(response => {
-      if (response.data !== null) {
-        var result = response.data.filter(currency => currency.rank <= 10);
+      if (response.data.data !== null) {
+        var result = response.data.data.filter(currency => currency.cmc_rank <= 10);
         result.map(crypto => fetchPriceData(crypto.symbol, numberOfDataPoints));
       }
     })
