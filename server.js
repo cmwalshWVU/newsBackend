@@ -90,9 +90,19 @@ function updateFeed(topic) {
 }
 
 app.get("/top", (req, res) => {
-  console.log("TEST")
   axios.get("https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?CMC_PRO_API_KEY=5b82bdf3-bf6d-4153-855b-635c1519b7a8")
       .then(response => {
+          console.log(response.data)
+
+          res.json(response.data);
+      })
+      .catch(err => console.log(err));
+  }
+);
+
+app.get("/history", (req, res) => {
+  console.log(req.query.ticker)
+  axios.get('https://min-api.cryptocompare.com/data/histominute?fsym=' + req.query.ticker + '&tsym=USD&limit=100&aggregate=15&e=CCCAGG')      .then(response => {
           console.log(response.data)
 
           res.json(response.data);
