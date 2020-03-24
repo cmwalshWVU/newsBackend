@@ -219,9 +219,7 @@ function fetchTopCryptos(numberOfDataPoints) {
         result.map(crypto => fetchPriceData(crypto.symbol, numberOfDataPoints));
       }
     })
-    .catch(err => console.log(err));
-}  
-  
+    .catch(err => console.log(err));  
 }
 
 
