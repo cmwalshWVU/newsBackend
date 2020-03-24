@@ -204,11 +204,26 @@ function fetchTopCryptos(numberOfDataPoints) {
     .then(response => {
       if (response.data.data !== null) {
         var result = response.data.data.filter(currency => currency.cmc_rank <= 10);
+        admin
+            .firestore()
+            .collection("top")
+            .doc("top20")
+            .set({
+              top20: response.data.data.filter(currency => currency.cmc_rank <= 20),
+              lastUpdated: new Date()
+            });
+        
+        pusher.trigger("top-20-channel", "top-20", {
+          top20: response.data.data.filter(currency => currency.cmc_rank <= 20)
+        });
         result.map(crypto => fetchPriceData(crypto.symbol, numberOfDataPoints));
       }
     })
     .catch(err => console.log(err));
+}  
+  
 }
+
 
 app.set("port", process.env.PORT || 5000);
 const server = app.listen(app.get("port"), () => {
