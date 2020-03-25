@@ -49,12 +49,15 @@ const pusher = new Pusher({
 const newsapi = new NewsAPI(process.env.NEWS_API_KEY);
 
 setTimeout(() => fetchTopCryptos(100), 10000);
+setTimeout(() => updateDailyHoldings(), 10000);
+
 // const news = cryptoCompareNews();
 setTimeout(() => cryptoCompareNews(), 10000);
 
 // repeat with the interval of 2 seconds
 setTimeout(() => fetchNewsData(), 5);
 setInterval(() => fetchTopCryptos(1), 60000);
+setInterval(() => updateDailyHoldings(), 900000);
 
 const fetchNews = (searchTerm, pageNum, date) =>
   newsapi.v2.everything({
@@ -219,7 +222,63 @@ function fetchTopCryptos(numberOfDataPoints) {
         result.map(crypto => fetchPriceData(crypto.symbol, numberOfDataPoints));
       }
     })
-    .catch(err => console.log(err));  
+    .catch(err => console.log(err));
+}
+
+function updateDailyHoldings() {
+  const currentDate = Date.now()
+  console.log("Setting Holdings history for timestamp: " + currentDate.toString())
+  axios.get("https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?CMC_PRO_API_KEY=5b82bdf3-bf6d-4153-855b-635c1519b7a8")
+    .then(response => {
+      if (response.data.data !== null) {
+        const top100 = response.data.data
+        admin.firestore().collection('users').get().then(async (userIdsCollectiom) => {
+          let userIds = userIdsCollectiom.docs.map(doc => doc.id);
+          userIds.map(async (userId) => {
+            let currentHoldings = 0
+            const holdingsDocs = await admin.firestore().collection("holdings").doc(userId).collection("holdings").get()
+            if (holdingsDocs.docs !== undefined) {
+              let holdings = holdingsDocs.docs.map(doc => doc.data());
+              // console.log(holdings)
+              holdings.forEach((holding) => {
+                const currPrice = top100.find((it) => it.symbol === holding.coin)
+                if (currPrice) {
+                  currentHoldings += Number(holding.numberOfCoins) * Number(currPrice.quote.USD.price)
+                }
+              })
+              // console.log(userId)
+              // console.log(currentHoldings)
+            }
+            
+            const cbHoldingsDocs = await admin.firestore().collection("cbHoldings").doc(userId).collection("cbHoldings").get()
+            if (cbHoldingsDocs.docs !== undefined) {
+              let cbHoldings = cbHoldingsDocs.docs.map(doc => doc.data());
+              // console.log(holdings)
+              cbHoldings.forEach((holding) => {
+                const currPrice = top100.find((it) => it.symbol === holding.holding.currency)
+                if (currPrice) {
+                  currentHoldings += Number(holding.holding.amount) * Number(currPrice.quote.USD.price)
+                }
+              })
+              admin
+              .firestore()
+              .collection("dailyHoldings")
+              .doc(userId)
+              .collection("holdingsHistory")
+              .doc(currentDate.toString())
+              .set({
+                totalHoldings: currentHoldings,
+                lastUpdated: new Date()
+              });
+            }
+          })
+        })
+      } else {
+        return
+      }
+    }).catch((err) => {
+      console.log(err)
+    })  
 }
 
 
