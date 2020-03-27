@@ -206,7 +206,7 @@ function fetchTopCryptos(numberOfDataPoints) {
   axios.get("https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?CMC_PRO_API_KEY=5b82bdf3-bf6d-4153-855b-635c1519b7a8")
     .then(response => {
       if (response.data.data !== null) {
-        var result = response.data.data.filter(currency => currency.cmc_rank <= 10);
+        var result = response.data.data.filter(currency => currency.cmc_rank <= 20);
         admin
             .firestore()
             .collection("top")
@@ -246,8 +246,6 @@ function updateDailyHoldings() {
                   currentHoldings += Number(holding.numberOfCoins) * Number(currPrice.quote.USD.price)
                 }
               })
-              // console.log(userId)
-              // console.log(currentHoldings)
             }
             
             const cbHoldingsDocs = await admin.firestore().collection("cbHoldings").doc(userId).collection("cbHoldings").get()
