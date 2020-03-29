@@ -56,7 +56,7 @@ setTimeout(() => cryptoCompareNews(), 10000);
 
 // repeat with the interval of 2 seconds
 setTimeout(() => fetchNewsData(), 5);
-setInterval(() => fetchTopCryptos(1), 60000);
+setInterval(() => fetchTopCryptos(1), 259459);
 setInterval(() => updateDailyHoldings(), 900000);
 
 const fetchNews = (searchTerm, pageNum, date) =>
