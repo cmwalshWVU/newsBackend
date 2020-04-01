@@ -56,7 +56,7 @@ setTimeout(() => cryptoCompareNews(), 10000);
 
 // repeat with the interval of 2 seconds
 setTimeout(() => fetchNewsData(), 5);
-setInterval(() => fetchTopCryptos(1), 259459);
+setInterval(() => fetchTopCryptos(1), 900000);
 setInterval(() => updateDailyHoldings(), 900000);
 
 const fetchNews = (searchTerm, pageNum, date) =>
@@ -178,7 +178,7 @@ function fetchPriceData(ticker, numberOfDataPoints) {
         ticker +
         "&tsym=USD&limit=" +
         numberOfDataPoints +
-        "&aggregate=1&e=CCCAGG"
+        "&aggregate=15&e=CCCAGG"
     )
     .then(response => {
       if (response.data !== null && response.data.Data !== null) {
