@@ -48,7 +48,7 @@ const pusher = new Pusher({
 
 const newsapi = new NewsAPI(process.env.NEWS_API_KEY);
 
-setTimeout(() => fetchTopCryptos(1), 10000);
+setTimeout(() => fetchTopCryptos(100), 10000);
 // setTimeout(() => updateDailyHoldings(), 10000);
 
 // const news = cryptoCompareNews();
