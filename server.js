@@ -48,8 +48,8 @@ const pusher = new Pusher({
 
 const newsapi = new NewsAPI(process.env.NEWS_API_KEY);
 
-setTimeout(() => fetchTopCryptos(100), 10000);
-setTimeout(() => updateDailyHoldings(), 10000);
+setTimeout(() => fetchTopCryptos(1), 10000);
+// setTimeout(() => updateDailyHoldings(), 10000);
 
 // const news = cryptoCompareNews();
 setTimeout(() => cryptoCompareNews(), 10000);
@@ -57,7 +57,7 @@ setTimeout(() => cryptoCompareNews(), 10000);
 // repeat with the interval of 2 seconds
 setTimeout(() => fetchNewsData(), 5);
 setInterval(() => fetchTopCryptos(1), 900000);
-setInterval(() => updateDailyHoldings(), 900000);
+// setInterval(() => updateDailyHoldings(), 900000);
 
 const fetchNews = (searchTerm, pageNum, date) =>
   newsapi.v2.everything({
@@ -206,6 +206,7 @@ function fetchTopCryptos(numberOfDataPoints) {
   axios.get("https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?CMC_PRO_API_KEY=5b82bdf3-bf6d-4153-855b-635c1519b7a8")
     .then(response => {
       if (response.data.data !== null) {
+        updateDailyHoldings(response.data.data)
         var result = response.data.data.filter(currency => currency.cmc_rank <= 20);
         admin
             .firestore()
@@ -225,13 +226,13 @@ function fetchTopCryptos(numberOfDataPoints) {
     .catch(err => console.log(err));
 }
 
-function updateDailyHoldings() {
+function updateDailyHoldings(top100) {
   const currentDate = Date.now()
   console.log("Setting Holdings history for timestamp: " + currentDate.toString())
-  axios.get("https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?CMC_PRO_API_KEY=5b82bdf3-bf6d-4153-855b-635c1519b7a8")
-    .then(response => {
-      if (response.data.data !== null) {
-        const top100 = response.data.data
+  // axios.get("https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?CMC_PRO_API_KEY=5b82bdf3-bf6d-4153-855b-635c1519b7a8")
+  //   .then(response => {
+      if (top100 !== null) {
+        // const top100 = response.data.data
         admin.firestore().collection('users').get().then(async (userIdsCollectiom) => {
           let userIds = userIdsCollectiom.docs.map(doc => doc.id);
           userIds.map(async (userId) => {
@@ -274,9 +275,9 @@ function updateDailyHoldings() {
       } else {
         return
       }
-    }).catch((err) => {
-      console.log(err)
-    })  
+    // }).catch((err) => {
+    //   console.log(err)
+    // })  
 }
 
 
