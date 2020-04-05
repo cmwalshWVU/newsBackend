@@ -213,7 +213,7 @@ function fetchTopCryptos(numberOfDataPoints) {
             .collection("top")
             .doc("top20")
             .set({
-              top20: response.data.data.filter(currency => currency.cmc_rank <= 20),
+              top20: response.data.data,
               lastUpdated: new Date()
             });
         
