@@ -246,7 +246,7 @@ function fetchTopCryptos(numberOfDataPoints) {
             });
         
         pusher.trigger("top-20-channel", "top-20", {
-          top20: response.data.data.filter(currency => currency.cmc_rank <= 20)
+          top20: response.data.data
         });
         result.map(crypto => fetchPriceData(crypto.symbol, numberOfDataPoints));
       }
