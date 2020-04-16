@@ -125,7 +125,9 @@ app.get("/token", (req, res) => {
 
 app.get("/wallets", (req, res) => {
   // console.log(req)
-  axios.get('https://us-central1-crypto-watch-dbf71.cloudfunctions.net/walletHodl', {headers: req.headers})
+  const headers = {'Authorization': 'Bearer ' + req.query.code }
+
+  axios.get('https://us-central1-crypto-watch-dbf71.cloudfunctions.net/walletHodl', {headers})
     .then(response => {
         console.log(response.data);
         res.json(response.data);
