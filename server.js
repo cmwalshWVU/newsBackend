@@ -112,13 +112,12 @@ app.get("/history", (req, res) => {
 
 app.get("/token", (req, res) => {
   axios.post(`https://us-central1-crypto-watch-dbf71.cloudfunctions.net/tokenHodl`, { 'code': req.query.code })
-  .then(res => {
-      console.log(res);
-      console.log(res.data);
-      res.json(res.data.authToken);
+  .then(response => {
+      console.log(response);
+      console.log(response.data);
+      res.json(response.data.authToken);
   }).catch((err) => {
     console.log(err)
-    res.json(null)
   })
 })
 
