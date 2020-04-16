@@ -115,10 +115,10 @@ app.get("/token", (req, res) => {
   .then(res => {
       console.log(res);
       console.log(res.data);
-      return res.data.authToken
+      res.json(res.data.authToken);
   }).catch((err) => {
     console.log(err)
-    return null
+    res.json(null)
   })
 })
 
