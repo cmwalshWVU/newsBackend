@@ -110,6 +110,18 @@ app.get("/history", (req, res) => {
   }
 );
 
+app.get("/token", (req, res) => {
+  axios.post(`https://us-central1-crypto-watch-dbf71.cloudfunctions.net/tokenHodl`, { 'code': req.query.code })
+  .then(res => {
+      console.log(res);
+      console.log(res.data);
+      return res.data.authToken
+  }).catch((err) => {
+    console.log(err)
+    return null
+  })
+})
+
 app.get("/live", (req, res) => {
   const topic = "crypto";
   var now = new Date();
