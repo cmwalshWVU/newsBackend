@@ -118,7 +118,22 @@ app.get("/token", (req, res) => {
       res.json(response.data.authToken);
   }).catch((err) => {
     console.log(err)
+    res.json(null)
   })
+})
+
+
+app.get("/wallets", (req, res) => {
+  console.log(req)
+  axios.get('https://us-central1-crypto-watch-dbf71.cloudfunctions.net/walletHodl', {headers: req.headers})
+    .then(response => {
+        // console.log(response.data);
+        res.json(response.data);
+    })
+    .catch(error => {
+      res.json(null)
+      console.log(error);
+    }); 
 })
 
 app.get("/live", (req, res) => {
