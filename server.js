@@ -124,15 +124,15 @@ app.get("/token", (req, res) => {
 
 
 app.get("/wallets", (req, res) => {
-  console.log(req)
+  // console.log(req)
   axios.get('https://us-central1-crypto-watch-dbf71.cloudfunctions.net/walletHodl', {headers: req.headers})
     .then(response => {
-        // console.log(response.data);
+        console.log(response.data);
         res.json(response.data);
     })
     .catch(error => {
-      res.json(null)
       console.log(error);
+      res.json(null)
     }); 
 })
 
