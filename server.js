@@ -55,7 +55,9 @@ setTimeout(() => fetchTopCryptos(100), 10000);
 setTimeout(() => cryptoCompareNews(), 10000);
 
 // repeat with the interval of 2 seconds
-setTimeout(() => fetchNewsData(), 5);
+setTimeout(() => updateFeed("crypto"), 5);
+setInterval(() => updateFeed("crypto"), 172800);
+
 setInterval(() => fetchTopCryptos(1), 900000);
 // setInterval(() => updateDailyHoldings(), 900000);
 
@@ -71,7 +73,6 @@ app.use(cors());
 
 function updateFeed(topic) {
   let counter = 1;
-  setInterval(() => {
     var now = new Date();
     now.setMinutes(now.getMinutes() - 10);
     console.log("Calling Update Feed");
@@ -91,7 +92,6 @@ function updateFeed(topic) {
         counter += 1;
       })
       .catch(error => console.log(error));
-  }, 172800);
 }
 
 app.get("/top", (req, res) => {
