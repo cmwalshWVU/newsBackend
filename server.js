@@ -70,10 +70,12 @@ const fetchNews = (searchTerm, pageNum, date) =>
 app.use(cors());
 
 function updateFeed(topic) {
-  let counter = 2;
-  var now = new Date();
-  now.setMinutes(now.getMinutes() - 3);
+  let counter = 1;
   setInterval(() => {
+    var now = new Date();
+    now.setMinutes(now.getMinutes() - 10);
+    console.log("Calling Update Feed");
+    cryptoCompareNews();
     fetchNews(topic, counter, now)
       .then(response => {
         let sorted = response.articles.sort((a, b) =>
