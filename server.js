@@ -144,6 +144,18 @@ app.get("/token", cors(corsOptions), (req, res) => {
 })
 
 
+app.get("/tokenMobile", cors(corsOptions), (req, res) => {
+  axios.post(`https://us-central1-crypto-watch-dbf71.cloudfunctions.net/tokenHodlMobile`, { 'code': req.query.code })
+  .then(response => {
+      console.log(response);
+      console.log(response.data);
+      res.json(response.data.authToken);
+  }).catch((err) => {
+    console.log(err)
+    res.json(null)
+  })
+})
+
 app.get("/wallets", cors(corsOptions), (req, res) => {
   // console.log(req)
   const headers = {'Authorization': 'Bearer ' + req.query.code }
