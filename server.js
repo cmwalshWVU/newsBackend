@@ -46,6 +46,25 @@ const pusher = new Pusher({
   encrypted: true
 });
 
+const allowedOrigins = [
+  'capacitor://localhost',
+  'ionic://localhost',
+  'http://localhost'
+];
+
+// Reflect the origin if it's in the allowed list or not defined (cURL, Postman, etc.)
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Origin not allowed by CORS'));
+    }
+  }
+}
+
+app.options('*', cors(corsOptions));
+
 const newsapi = new NewsAPI(process.env.NEWS_API_KEY);
 
 setTimeout(() => fetchTopCryptos(100), 10000);
@@ -112,7 +131,7 @@ app.get("/history", (req, res) => {
   }
 );
 
-app.get("/token", (req, res) => {
+app.get("/token", cors(corsOptions), (req, res) => {
   axios.post(`https://us-central1-crypto-watch-dbf71.cloudfunctions.net/tokenHodl`, { 'code': req.query.code })
   .then(response => {
       console.log(response);
@@ -125,7 +144,7 @@ app.get("/token", (req, res) => {
 })
 
 
-app.get("/wallets", (req, res) => {
+app.get("/wallets", cors(corsOptions), (req, res) => {
   // console.log(req)
   const headers = {'Authorization': 'Bearer ' + req.query.code }
 
