@@ -402,11 +402,34 @@ function updatePayDayDailyHoldings() {
         }
       })
       
-      Firebase.firestore().collection("dailyHoldings").doc(userId).collection("holdingsHistory")
-        .doc(currentDate.toString()).set({
+      var docRef = Firebase.firestore().collection("dailyHoldings").doc(userId)
+      try {
+        const doc = await docRef.get();
+        if (doc.exists) {
+          docRef.collection("holdingsHistory").doc(currentDate.toString()).set({
             totalHoldings: currentHoldings,
             lastUpdated: new Date()
+          })
+        }
+        else {
+          Firebase.firestore().collection("dailyHoldings").doc(userId).set({}).then(() => {
+            docRef.collection("holdingsHistory").doc(currentDate.toString()).set({
+              totalHoldings: currentHoldings,
+              lastUpdated: new Date()
+            }).catch(function(error) {
+              console.log(error)
+            });
           });
+        }
+      }
+      catch (error) {
+        console.log("Error getting document:", error);
+      }
+      // Firebase.firestore().collection("dailyHoldings").doc(userId).collection("holdingsHistory")
+      //   .doc(currentDate.toString()).set({
+      //       totalHoldings: currentHoldings,
+      //       lastUpdated: new Date()
+      //     });
 
     })
   })
