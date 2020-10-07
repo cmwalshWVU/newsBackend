@@ -86,7 +86,7 @@ const Firebase  = firebase.initializeApp(config);
 const newsapi = new NewsAPI(process.env.NEWS_API_KEY);
 
 setTimeout(() => updatePayDayDailyHoldings(), 1000);
-setInterval(() => updatePayDayDailyHoldings(), 900000);
+setInterval(() => updatePayDayDailyHoldings(), 300000);
 
 setTimeout(() => fetchTopCryptos(100), 10000);
 // setTimeout(() => updateDailyHoldings(), 10000);
