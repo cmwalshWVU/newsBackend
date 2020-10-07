@@ -369,74 +369,69 @@ const web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io
 function updatePayDayDailyHoldings() {
   const currentDate = Date.now()
   console.log("Setting Pay Holdings history for timestamp: " + currentDate.toString())
-  // axios.get("https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?CMC_PRO_API_KEY=5b82bdf3-bf6d-4153-855b-635c1519b7a8")
-  //   .then(response => {
-  // const top100 = response.data.data
-  Firebase.firestore().collection('accounts').get().then(async (userIdsCollectiom) => {
-    let userIds = userIdsCollectiom.docs.map(doc => doc.id);
-    userIds.map(async (userId) => {
-      console.log("User ID: " + userId)
-      const response = await axios.get("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false")
-      const currentPrices = response.data
-      console.log(currentPrices.data)
-      const amount = await web3.eth.getBalance(userId)
-      let currentHoldings =  Number(currentPrices.filter((it) => it.symbol === "eth")[0].current_price) * Number(web3.utils.fromWei(amount, 'ether'))
+  axios.get("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false").then(async (response) => {
+    console.log(response)
+    const currentPrices = response.data
+    Firebase.firestore().collection('accounts').get().then(async (userIdsCollectiom) => {
+      let userIds = userIdsCollectiom.docs.map(doc => doc.id);
+      userIds.map(async (userId) => {
+        console.log("User ID: " + userId)
 
-      console.log("ETH Holding" + currentHoldings)
-      ERC20TOKENS.forEach(async (token) => {
-        // GET TOKEN contract and decimals
-        const contract = new web3.eth.Contract(MinAbi, token.address);
-        const dec = await contract.methods.decimals().call()
+        console.log(currentPrices.data)
+        const amount = await web3.eth.getBalance(userId)
+        let currentHoldings =  Number(currentPrices.filter((it) => it.symbol === "eth")[0].current_price) * Number(web3.utils.fromWei(amount, 'ether'))
 
-        // GET ERC20 Token Balance and divide by decimals
-        let bal = await contract.methods.balanceOf(userId).call()
+        console.log("ETH Holding" + currentHoldings)
+        var ctr = 0;
 
-        bal = bal / (10 ** dec)
+        ERC20TOKENS.forEach(async (token) => {
+          // GET TOKEN contract and decimals
+          const contract = new web3.eth.Contract(MinAbi, token.address);
+          const dec = await contract.methods.decimals().call()
 
-        console.log("checking token " + token.symbol)
-        console.log("token balance: " + bal)
-        if (currentPrices.filter((it) => it.symbol === token.symbol.toLowerCase())[0]) {
-            const tokenHoldings = currentPrices.filter((it) => it.symbol === token.symbol.toLowerCase())[0].current_price * bal
-            console.log("token value: " + tokenHoldings)
+          // GET ERC20 Token Balance and divide by decimals
+          let bal = await contract.methods.balanceOf(userId).call()
 
-            currentHoldings += tokenHoldings
-        }
+          bal = bal / (10 ** dec)
+
+          console.log("checking token " + token.symbol)
+          console.log("token balance: " + bal)
+          if (currentPrices.filter((it) => it.symbol === token.symbol.toLowerCase())[0]) {
+              const tokenHoldings = currentPrices.filter((it) => it.symbol === token.symbol.toLowerCase())[0].current_price * bal
+              console.log("token value: " + tokenHoldings)
+              currentHoldings += tokenHoldings
+          }
+          ctr++
+          if (ctr === ERC20TOKENS.length) {
+            console.log(`${userId} holdings: ${currentHoldings}`)
+            var docRef = Firebase.firestore().collection("dailyHoldings").doc(userId)
+            try {
+              const doc = await docRef.get();
+              if (doc.exists) {
+                docRef.collection("holdingsHistory").doc(currentDate.toString()).set({
+                  totalHoldings: currentHoldings,
+                  lastUpdated: new Date()
+                })
+              }
+              else {
+                Firebase.firestore().collection("dailyHoldings").doc(userId).set({}).then(() => {
+                  docRef.collection("holdingsHistory").doc(currentDate.toString()).set({
+                    totalHoldings: currentHoldings,
+                    lastUpdated: new Date()
+                  }).catch(function(error) {
+                    console.log(error)
+                  });
+                });
+              }
+            } catch (error) {
+              console.log("Error getting document:", error);
+            }
+          }
+        })
       })
-      
-      var docRef = Firebase.firestore().collection("dailyHoldings").doc(userId)
-      try {
-        const doc = await docRef.get();
-        if (doc.exists) {
-          docRef.collection("holdingsHistory").doc(currentDate.toString()).set({
-            totalHoldings: currentHoldings,
-            lastUpdated: new Date()
-          })
-        }
-        else {
-          Firebase.firestore().collection("dailyHoldings").doc(userId).set({}).then(() => {
-            docRef.collection("holdingsHistory").doc(currentDate.toString()).set({
-              totalHoldings: currentHoldings,
-              lastUpdated: new Date()
-            }).catch(function(error) {
-              console.log(error)
-            });
-          });
-        }
-      }
-      catch (error) {
-        console.log("Error getting document:", error);
-      }
-      // Firebase.firestore().collection("dailyHoldings").doc(userId).collection("holdingsHistory")
-      //   .doc(currentDate.toString()).set({
-      //       totalHoldings: currentHoldings,
-      //       lastUpdated: new Date()
-      //     });
-
     })
   })
 }
-
-
 
 
 app.set("port", process.env.PORT || 5000);
