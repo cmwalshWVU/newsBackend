@@ -384,7 +384,6 @@ function updatePayDayDailyHoldings() {
       console.log("ETH Holding" + currentHoldings)
       ERC20TOKENS.forEach(async (token) => {
         // GET TOKEN contract and decimals
-        console.log("checking token " + token.symbol)
         const contract = new web3.eth.Contract(MinAbi, token.address);
         const dec = await contract.methods.decimals().call()
 
@@ -393,6 +392,7 @@ function updatePayDayDailyHoldings() {
 
         bal = bal / (10 ** dec)
 
+        console.log("checking token " + token.symbol)
         console.log("token balance: " + bal)
         if (currentPrices.filter((it) => it.symbol === token.symbol.toLowerCase())[0]) {
             const tokenHoldings = currentPrices.filter((it) => it.symbol === token.symbol.toLowerCase())[0].current_price * bal
