@@ -86,7 +86,7 @@ const Firebase  = firebase.initializeApp(config);
 const newsapi = new NewsAPI(process.env.NEWS_API_KEY);
 
 setTimeout(() => updatePayDayDailyHoldings(), 1000);
-setInterval(() => updatePayDayDailyHoldings(), 300000);
+setInterval(() => updatePayDayDailyHoldings(), 3600000);
 
 setTimeout(() => fetchTopCryptos(100), 10000);
 // setTimeout(() => updateDailyHoldings(), 10000);
@@ -362,7 +362,7 @@ function updateDailyHoldings(top100) {
     // })  
 }
 
-const web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/fe144c9b7ccd44fc9f4ef53807df0bc5"))
+const web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/7b57649a10fe40fbb47f8e2b770ae04c"))
 
 
 
