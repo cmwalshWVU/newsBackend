@@ -106,7 +106,8 @@ const fetchNews = (searchTerm, pageNum, date) =>
     q: searchTerm,
     from: date,
     language: "en",
-    sortBy: "recency"
+    sortBy: "recency",
+    pageSize: 100
   });
 
 app.use(cors());
@@ -363,8 +364,6 @@ function updateDailyHoldings(top100) {
 }
 
 const web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/7b57649a10fe40fbb47f8e2b770ae04c"))
-
-
 
 function updatePayDayDailyHoldings() {
   const currentDate = Date.now()
