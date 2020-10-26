@@ -393,38 +393,40 @@ function updatePayDayDailyHoldings() {
           if (bal > 0) {
             const dec = await contract.methods.decimals().call()
             bal = bal / (10 ** dec)
-            console.log("checking token " + token.symbol)
-            console.log("token balance: " + bal)
-            if (currentPrices.filter((it) => it.symbol === token.symbol.toLowerCase())[0]) {
-                const tokenHoldings = currentPrices.filter((it) => it.symbol === token.symbol.toLowerCase())[0].current_price * bal
-                console.log("token value: " + tokenHoldings)
-                currentHoldings += tokenHoldings
-            }
-            ctr++
-            if (ctr === ERC20TOKENS.length) {
-              console.log(`${userId} holdings: ${currentHoldings}`)
-              var docRef = Firebase.firestore().collection("dailyHoldings").doc(userId)
-              try {
-                const doc = await docRef.get();
-                if (doc.exists) {
+
+          }
+
+          console.log("checking token " + token.symbol)
+          console.log("token balance: " + bal)
+          if (currentPrices.filter((it) => it.symbol === token.symbol.toLowerCase())[0]) {
+              const tokenHoldings = currentPrices.filter((it) => it.symbol === token.symbol.toLowerCase())[0].current_price * bal
+              console.log("token value: " + tokenHoldings)
+              currentHoldings += tokenHoldings
+          }
+          ctr++
+          if (ctr === ERC20TOKENS.length) {
+            console.log(`${userId} holdings: ${currentHoldings}`)
+            var docRef = Firebase.firestore().collection("dailyHoldings").doc(userId)
+            try {
+              const doc = await docRef.get();
+              if (doc.exists) {
+                docRef.collection("holdingsHistory").doc(currentDate.toString()).set({
+                  totalHoldings: currentHoldings,
+                  lastUpdated: new Date()
+                })
+              }
+              else {
+                Firebase.firestore().collection("dailyHoldings").doc(userId).set({}).then(() => {
                   docRef.collection("holdingsHistory").doc(currentDate.toString()).set({
                     totalHoldings: currentHoldings,
                     lastUpdated: new Date()
-                  })
-                }
-                else {
-                  Firebase.firestore().collection("dailyHoldings").doc(userId).set({}).then(() => {
-                    docRef.collection("holdingsHistory").doc(currentDate.toString()).set({
-                      totalHoldings: currentHoldings,
-                      lastUpdated: new Date()
-                    }).catch(function(error) {
-                      console.log(error)
-                    });
+                  }).catch(function(error) {
+                    console.log(error)
                   });
-                }
-              } catch (error) {
-                console.log("Error getting document:", error);
+                });
               }
+            } catch (error) {
+              console.log("Error getting document:", error);
             }
           }
         })
