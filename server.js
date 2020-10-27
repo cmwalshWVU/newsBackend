@@ -11,6 +11,7 @@ const Pusher = require("pusher");
 const NewsAPI = require("newsapi");
 const axios = require("axios");
 const app = express();
+const moment = require("moment")
 
 var serviceAccount = process.env.FIREBASE_CONFIG;
 
@@ -95,7 +96,7 @@ setTimeout(() => fetchTopCryptos(100), 10000);
 setTimeout(() => cryptoCompareNews(), 10000);
 
 // repeat with the interval of 2 seconds
-setTimeout(() => updateFeed("crypto"), 5);
+setTimeout(() => fetchNewsData(), 5);
 setInterval(() => updateFeed("crypto"), 172800);
 
 setInterval(() => fetchTopCryptos(1), 900000);
@@ -124,8 +125,16 @@ function updateFeed(topic) {
           a.publishedAt > b.publishedAt ? 1 : -1
         );
 
+        console.log(`attempting to save ${sorted.length} articles`)
         for (let i = 0; i < sorted.length; i++) {
-          // console.log(JSON.stringify(response.articles[i]))
+          try {
+            Firebase.firestore().collection("articles").doc(`${sorted[i].publishedAt}-${sorted[i].title.replace("/", "_")}`).set({
+              article: sorted[i],
+              lastUpdated: new Date()
+            })
+          } catch (error) {
+            console.log("Error saving article:", error);
+          }
           pusher.trigger("news-channel", "update-news", {
             articles: sorted[i]
           });
@@ -221,10 +230,20 @@ function cryptoCompareNews() {
     .then(response => {
       if (response.data !== null && response.data.Data !== undefined) {
         console.log("sendings news");
+        console.log(`attempting to save ${response.data.Data.length} articles`)
+
         for (let i = 0; i < response.data.Data.length; i++) {
           pusher.trigger("news-channel", "update-news", {
             articles: response.data.Data[i]
           });
+          try {
+            Firebase.firestore().collection("articles").doc(`${moment(response.data.Data[i].published_on * 1000).format()}-${response.data.Data[i].title.replace("/", "_")}`).set({
+              article: response.data.Data[i],
+              lastUpdated: new Date()
+            })
+          } catch (error) {
+            console.log("Error saving article:", error);
+          }
         }
       } else {
         console.log("not sendings news");
@@ -236,15 +255,23 @@ function cryptoCompareNews() {
 function fetchNewsData() {
   const topic = "crypto";
   var now = new Date();
-  now.setHours(now.getHours() - 6);
+  now.setDate(now.getDate() - 20);
   console.log("Calling Live");
   fetchNews(topic, 1, now.toISOString())
     .then(response => {
       let sorted = response.articles.sort((a, b) =>
         a.publishedAt > b.publishedAt ? 1 : -1
       );
-
+      console.log(`attempting to save ${sorted.length} articles`)
       for (let i = 0; i < sorted.length; i++) {
+        try {
+          Firebase.firestore().collection("articles").doc(`${sorted[i].publishedAt}-${sorted[i].title.replace("/", "_")}`).set({
+            article: sorted[i],
+            lastUpdated: new Date()
+          })
+        } catch (error) {
+          console.log("Error saving article:", error);
+        }
         pusher.trigger("news-channel", "update-news", {
           articles: sorted[i]
         });
