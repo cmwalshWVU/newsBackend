@@ -396,7 +396,7 @@ function updatePayDayDailyHoldings() {
   const currentDate = Date.now()
   console.log("Setting Pay Holdings history for timestamp: " + currentDate.toString())
   axios.get("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false").then(async (response) => {
-    console.log(response)
+    // console.log(response)
     const currentPrices = response.data
     Firebase.firestore().collection('accounts').get().then(async (userIdsCollectiom) => {
       let userIds = userIdsCollectiom.docs.map(doc => doc.id);
