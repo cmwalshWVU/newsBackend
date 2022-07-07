@@ -19,7 +19,7 @@
     "express": "^4.17.1",
     "firebase": "^7.22.0",
     "firebase-admin": "^8.6.0",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "newsapi": "^2.4.0",
     "pusher": "^2.2.1",
     "pusher-js": "^4.4.0",
